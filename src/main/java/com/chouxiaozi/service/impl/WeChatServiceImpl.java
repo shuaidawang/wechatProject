@@ -2,6 +2,8 @@ package com.chouxiaozi.service.impl;
 
 import com.chouxiaozi.model.TextMessage;
 import com.chouxiaozi.service.WeChatService;
+import com.chouxiaozi.type.MsgType;
+import com.chouxiaozi.type.WeChatType;
 import com.chouxiaozi.util.CheckUtil;
 import com.chouxiaozi.util.MessageUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +40,8 @@ public class WeChatServiceImpl implements WeChatService {
             String content = map.get("Content");
             String msg = "";
             log.info("msgType== "+msgType);
-            if("text".equals(msgType)){
+            //文字消息
+            if(WeChatType.MsgType.TEXT.equals(msgType)){
                 TextMessage textMessage = new TextMessage();
                 textMessage.setMsgType(msgType);
                 textMessage.setFromUserName(toUserName);
@@ -46,6 +49,17 @@ public class WeChatServiceImpl implements WeChatService {
                 textMessage.setCreateTime(String.valueOf((new Date()).getTime()));
                 textMessage.setContent(content+"? 你真帅");
                 msg = MessageUtil.textMessageToXml(textMessage);
+            }else if(WeChatType.MsgType.EVENT.equals(msgType)){
+                //关注回复
+                if(map.get("Event").equals("subscribe")){
+                    TextMessage textMessage = new TextMessage();
+                    textMessage.setMsgType("text");
+                    textMessage.setFromUserName(toUserName);
+                    textMessage.setToUserName(fromUserName);
+                    textMessage.setCreateTime(String.valueOf((new Date()).getTime()));
+                    textMessage.setContent("客官您好，感谢您的关注!");
+                    msg = MessageUtil.textMessageToXml(textMessage);
+                }
             }
             return msg;
         } catch (IOException e) {
